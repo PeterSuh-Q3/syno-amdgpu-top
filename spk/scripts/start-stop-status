@@ -1,0 +1,20 @@
+#!/bin/sh
+# DSM requires this compatibility entry point even for a file-only package.
+# status must return success so DSM does not repeatedly stop/restart an
+# intentionally daemonless package (same convention as syno-amdgpu-runtime /
+# SynoCommunity's SynoCli Video Drivers package).
+case "${1:-}" in
+  start)
+    # Self-heal the /usr/bin/amdgpu_top shim: on some DSM units postinst runs
+    # before the privilege-declared setuid bit on amdgpu-path-helper is
+    # applied, so the first symlink attempt silently fails. Retrying here
+    # (idempotent) repairs the shim without requiring a reinstall.
+    RUNTIME=/var/packages/syno-amdgpu-top/target
+    [ -c /dev/dri/renderD128 ] && [ "$(cat /sys/class/drm/renderD128/device/vendor 2>/dev/null || true)" = "0x1002" ] && [ -x "$RUNTIME/bin/helper/amdgpu-path-helper" ] && "$RUNTIME/bin/helper/amdgpu-path-helper" install || true
+    exit 0
+    ;;
+  status) exit 0 ;;
+  stop) exit 0 ;;
+  log) exit 1 ;;
+  *) exit 1 ;;
+esac

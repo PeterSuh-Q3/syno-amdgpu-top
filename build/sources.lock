@@ -1,0 +1,6 @@
+# Release builds must replace any TODO with the verified sha256 of the exact
+# archive named in versions.env. build-runtime.sh refuses a release build
+# while this file contains TODO. Hashes below are carried over from
+# syno-amdgpu-driver's sources.lock for the same pinned versions.
+libdrm-2.4.124.tar.xz ac36293f61ca4aafaf4b16a2a7afff312aa4f5c37c9fbd797de9e3c0863ca379
+amdgpu_top-0.11.5.tar.gz e511ed15a6e0f3ea72321dfc97145ffb85999b37b6b304e9795978945f3f04cd

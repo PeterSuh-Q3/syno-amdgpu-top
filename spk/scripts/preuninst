@@ -1,0 +1,4 @@
+#!/bin/sh
+RUNTIME=/var/packages/syno-amdgpu-top/target
+[ -x "$RUNTIME/bin/helper/amdgpu-path-helper" ] && "$RUNTIME/bin/helper/amdgpu-path-helper" remove || true
+exit 0

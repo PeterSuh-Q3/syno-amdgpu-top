@@ -1,0 +1,38 @@
+# syno-amdgpu-top
+
+Synology DSM용 독립형 `amdgpu_top` GPU 모니터 SPK.
+
+[syno-amdgpu-driver](https://github.com/PeterSuh-Q3/syno-amdgpu-driver)(AMD VA-API/RADV Vulkan 런타임)에서 `amdgpu_top`만 분리한 패키지입니다. `amdgpu_top`은 `libdrm_amdgpu`를 통해 커널의 `amdgpu.ko` 드라이버와 DRM ioctl/sysfs로 직접 통신하는 **모니터링 전용 도구**로, Mesa(RadeonSI/RADV)나 libva 같은 무거운 렌더링/트랜스코딩 스택에 전혀 의존하지 않습니다. 그래서:
+
+- GPU 사용률, VRAM, 클럭, 온도, 팬, 프로세스별 GPU 점유율을 보는 것만이 목적이라면 이 패키지 하나로 충분합니다.
+- Jellyfin/Plex 하드웨어 트랜스코딩(VA-API)이 필요하면 [syno-amdgpu-driver](https://github.com/PeterSuh-Q3/syno-amdgpu-driver)를 설치하세요 — 그쪽은 Mesa/LLVM까지 포함해 훨씬 큽니다.
+
+## 설치 후 사용
+
+```bash
+amdgpu_top
+```
+
+`/usr/bin/amdgpu_top` 심볼릭 링크가 자동으로 등록됩니다. AMD DRM render node(`/dev/dri/renderD128`, PCI vendor `0x1002`)가 없는 NAS(Intel iGPU만 있는 경우 등)에서는 패키지 설치는 되지만 PATH 등록 없이 no-op으로 끝납니다.
+
+> [!WARNING]
+> DSM 커널 4.4 환경은 `amdgpu_top`이 DRM 컨텍스트를 닫을 때 커널의 백포트된 AMDGPU 스케줄러가 불안정할 수 있다는 [syno-amdgpu-driver 쪽 관찰](https://github.com/PeterSuh-Q3/syno-amdgpu-driver)에 따라, `kernel4.4.x` 패키지에서는 바이너리는 유지하되 `/usr/bin`에 등록하지 않습니다(실험적 진단 도구로만 보관).
+
+## 빌드
+
+자세한 내용은 [docs/build.md](docs/build.md) 참고. 요약:
+
+```bash
+./scripts/fetch-sources.sh
+./scripts/run-spk-build.sh 7.4 kvmx64
+```
+
+패키지 스크립트/버전만 바뀐 경우(라이브러리 재컴파일 불필요)에는:
+
+```bash
+./scripts/repackage-kernel-flavors.sh dist/syno-amdgpu-top-<version>-7.4-x86_64-kernel5.10.55.spk kvmx64 7.4
+```
+
+## 라이선스
+
+MIT — [LICENSE](LICENSE) 참고.
