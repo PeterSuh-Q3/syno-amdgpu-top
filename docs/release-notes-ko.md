@@ -1,5 +1,9 @@
 # 릴리즈 노트
 
+## 0.1.1
+
+`kernel5.10.55` 패키지가 실제로 5.10.55 커널에서 실행 중인지 `postinst`/`start-stop-status`에서 `uname -r`로 확인하도록 추가했습니다. 이전에는 커널별 분리가 "어느 `.spk` 파일을 설치하는가"라는 사용자 선택에만 의존해서, 실수로 `kernel5.10.55.spk`를 4.4 커널 기기에 설치하면 검증 없이 `amdgpu_top`을 PATH에 등록해버렸습니다. 이제 실행 중인 커널이 5.10.55가 아니면 PATH 등록/자가 치유를 건너뜁니다.
+
 ## 0.1.0
 
 [syno-amdgpu-driver](https://github.com/PeterSuh-Q3/syno-amdgpu-driver) 0.4.1에서 `amdgpu_top` 관련 코드(바이너리, `amdgpu-path-helper` setuid 도구, PATH 자가 치유, 커널별 정책)를 그대로 분리해 독립 패키지로 최초 배포합니다.

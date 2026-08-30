@@ -1,6 +1,18 @@
 #!/bin/sh
 set -eu
 RUNTIME=/var/packages/syno-amdgpu-top/target
+# This is the kernel5.10.55 flavor. Kernel 4.4's backported AMDGPU scheduler
+# can fault when amdgpu_top closes its DRM context, so PATH registration must
+# never happen there. The two flavors differ only by which .spk a user
+# chooses to install, so verify the running kernel actually matches instead
+# of trusting that choice.
+case "$(uname -r)" in
+  5.10.55*) ;;
+  *)
+    echo "Notice: running kernel $(uname -r) is not 5.10.55; install the kernel4.4.x package instead. Skipping PATH integration." >&2
+    exit 0
+    ;;
+esac
 if [ ! -c /dev/dri/renderD128 ] || [ "$(cat /sys/class/drm/renderD128/device/vendor 2>/dev/null || true)" != "0x1002" ]; then
   echo "Notice: no AMD DRM render node; amdgpu_top installed without PATH integration." >&2
   exit 0

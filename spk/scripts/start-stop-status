@@ -9,8 +9,14 @@ case "${1:-}" in
     # before the privilege-declared setuid bit on amdgpu-path-helper is
     # applied, so the first symlink attempt silently fails. Retrying here
     # (idempotent) repairs the shim without requiring a reinstall.
+    # This is the kernel5.10.55 flavor; never self-heal the PATH shim if the
+    # running kernel turns out not to be 5.10.55 (see postinst).
     RUNTIME=/var/packages/syno-amdgpu-top/target
-    [ -c /dev/dri/renderD128 ] && [ "$(cat /sys/class/drm/renderD128/device/vendor 2>/dev/null || true)" = "0x1002" ] && [ -x "$RUNTIME/bin/helper/amdgpu-path-helper" ] && "$RUNTIME/bin/helper/amdgpu-path-helper" install || true
+    case "$(uname -r)" in
+      5.10.55*)
+        [ -c /dev/dri/renderD128 ] && [ "$(cat /sys/class/drm/renderD128/device/vendor 2>/dev/null || true)" = "0x1002" ] && [ -x "$RUNTIME/bin/helper/amdgpu-path-helper" ] && "$RUNTIME/bin/helper/amdgpu-path-helper" install || true
+        ;;
+    esac
     exit 0
     ;;
   status) exit 0 ;;
