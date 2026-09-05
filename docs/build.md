@@ -4,13 +4,22 @@
 
 ## Build container prerequisites
 
-`syno-amdgpu-driver`와 동일한 `dante90/syno-compiler:7.4`(→ `syno-amdgpu-builder:7.4`) 이미지를 그대로 재사용합니다. 이 이미지는 이미 아래를 제공합니다.
+이 저장소는 전용 Docker 이미지 `syno-amdgpu-top-builder:7.4`를 사용합니다.
+기반은 `dante90/syno-compiler:7.4`이며, Intel 빌더와 같이 그 안의 `/opt/kvmx64`만 가져온 뒤 깨끗한 Debian 12 레이어에 필요한 도구만 설치합니다. 이미지 정의는 [`docker/Dockerfile`](../docker/Dockerfile)에 있으므로 Docker Desktop 또는 Linux Docker 환경에서 같은 결과를 재현할 수 있습니다.
 
 - Meson, Ninja, pkg-config
 - Rust/Cargo 및 `x86_64-unknown-linux-gnu` Rust target
 - 각 DSM 플랫폼의 Synology 툴체인 (`/opt/<platform>`)
 
-이 저장소 전용 경량 빌더 이미지는 아직 없습니다 — LLVM/Mesa 툴체인까지 포함된 기존 이미지를 그대로 쓰는 것뿐이라 이미지 자체는 무겁지만, 빌드 자체는 libdrm+amdgpu_top만 컴파일하므로 빠릅니다.
+LLVM, Mesa, libva, OpenCL은 이미지에 포함하지 않습니다. 즉, 기존 `syno-amdgpu-driver` 공용 빌더보다 작고 목적이 분명합니다. 최초 `run-spk-build.sh` 실행 시 이미지가 없으면 자동으로 빌드하며, 수동으로 준비하려면 아래를 실행합니다.
+
+```bash
+./scripts/build-builder.sh 7.4
+```
+
+현재 AMD 런타임의 최초 빌드 기록은 `192.168.45.228` Docker 호스트에서 수행됐습니다. 호스트 OS는 빌드 결과에 영향을 주지 않으며, Docker 엔진과 이 Dockerfile이 재현 가능한 빌드 환경을 정의합니다.
+
+macOS Docker Desktop은 이미지 풀 시 `docker-credential-desktop`을 요구합니다. 빌더 스크립트는 해당 도우미가 일반 셸 `PATH`에 없더라도 Docker.app의 표준 위치를 자동으로 추가하며, Docker 설정 파일은 변경하지 않습니다.
 
 ## Sources and reproducibility
 
@@ -32,6 +41,14 @@ sources/amdgpu_top
 ```bash
 ./scripts/run-spk-build.sh 7.4 kvmx64
 ```
+
+이미지를 명시적으로 바꾸어 시험할 때만 다음 환경 변수를 사용합니다.
+
+```bash
+BUILDER_IMAGE=my-amdgpu-builder:7.4 ./scripts/run-spk-build.sh 7.4 kvmx64
+```
+
+이 경량 이미지는 의도적으로 `kvmx64`만 포함하므로, 두 번째 인자는 항상 `kvmx64`여야 합니다. `amdgpu_top`은 사용자 공간 x86_64 도구이며, DSM 패키지의 지원 플랫폼 목록은 별도로 관리됩니다.
 
 `dist/syno-amdgpu-top-<version>-7.4-x86_64-kernel5.10.55.spk`와 `...-kernel4.4.x.spk`가 생성됩니다.
 

@@ -4,13 +4,19 @@ set -euo pipefail
 DSM_VERSION=${1:-7.4}
 PLATFORM=${2:-kvmx64}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-# Reuses syno-amdgpu-driver's builder image: it already has the Synology
-# toolchain, meson/ninja, and the Rust target this build needs. A dedicated,
-# lighter builder image (no LLVM/Mesa toolchain) is a possible future
-# trim, not a functional requirement.
-BUILDER_IMAGE=${BUILDER_IMAGE:-syno-amdgpu-builder:${DSM_VERSION}}
+# Dedicated AMD monitor builder.  It has the DSM toolchains plus only the
+# libdrm/Rust build dependencies; it intentionally excludes Mesa/LLVM/VA-API.
+BUILDER_IMAGE=${BUILDER_IMAGE:-syno-amdgpu-top-builder:${DSM_VERSION}}
+
+[[ $PLATFORM == kvmx64 ]] || {
+  echo 'This compact builder contains only the kvmx64 toolchain; use kvmx64.' >&2
+  exit 2
+}
 
 "$ROOT/scripts/generate-cross-file.sh" "$PLATFORM" "$DSM_VERSION" >/dev/null
+
+docker image inspect "$BUILDER_IMAGE" >/dev/null 2>&1 || \
+  "$ROOT/scripts/build-builder.sh" "$DSM_VERSION"
 
 SUDO=()
 docker info >/dev/null 2>&1 || SUDO=(sudo)
