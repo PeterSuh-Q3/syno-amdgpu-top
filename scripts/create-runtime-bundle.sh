@@ -17,7 +17,11 @@ test -d "$SOURCE/lib"
 rm -rf "$WORK"
 mkdir -p "$WORK/runtime/bin" "$WORK/runtime/lib" "$WORK/runtime/share/libdrm"
 cp -a "$SOURCE/bin/amdgpu_top" "$WORK/runtime/bin/"
-cp -a "$SOURCE/lib/." "$WORK/runtime/lib/"
+# Only the shared objects (and their symlinks) are runtime data.  Do not leak
+# pkg-config metadata into the Manager bundle.
+while IFS= read -r library; do
+  cp -a "$library" "$WORK/runtime/lib/"
+done < <(find "$SOURCE/lib" -maxdepth 1 \( -type f -o -type l \) -name '*.so*' | sort)
 test ! -f "$SOURCE/share/libdrm/amdgpu.ids" || cp -a "$SOURCE/share/libdrm/amdgpu.ids" "$WORK/runtime/share/libdrm/"
 
 {
