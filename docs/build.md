@@ -4,14 +4,14 @@
 
 ## Build container prerequisites
 
-이 저장소는 전용 Docker 이미지 `syno-amdgpu-top-builder:7.4`를 사용합니다.
+이 저장소는 Docker Hub 전용 이미지 `dante90/syno-amdgpu-top-builder:7.4`를 사용합니다.
 기반은 `dante90/syno-compiler:7.4`이며, Intel 빌더와 같이 그 안의 `/opt/kvmx64`만 가져온 뒤 깨끗한 Debian 12 레이어에 필요한 도구만 설치합니다. 이미지 정의는 [`docker/Dockerfile`](../docker/Dockerfile)에 있으므로 Docker Desktop 또는 Linux Docker 환경에서 같은 결과를 재현할 수 있습니다.
 
 - Meson, Ninja, pkg-config
 - Rust/Cargo 및 `x86_64-unknown-linux-gnu` Rust target
 - 각 DSM 플랫폼의 Synology 툴체인 (`/opt/<platform>`)
 
-LLVM, Mesa, libva, OpenCL은 이미지에 포함하지 않습니다. 즉, 기존 `syno-amdgpu-driver` 공용 빌더보다 작고 목적이 분명합니다. 최초 `run-spk-build.sh` 실행 시 이미지가 없으면 자동으로 빌드하며, 수동으로 준비하려면 아래를 실행합니다.
+LLVM, Mesa, libva, OpenCL은 이미지에 포함하지 않습니다. 즉, 기존 `syno-amdgpu-driver` 공용 빌더보다 작고 목적이 분명합니다. 최초 `run-spk-build.sh` 실행 시 이미지가 없으면 Docker Hub에서 자동으로 pull하며, 수동으로 Dockerfile을 빌드하려면 아래를 실행합니다.
 
 ```bash
 ./scripts/build-builder.sh 7.4

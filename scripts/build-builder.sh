@@ -18,5 +18,5 @@ if ! command -v docker-credential-desktop >/dev/null 2>&1 && \
 fi
 
 docker build --build-arg "DSM_VERSION=$DSM_VERSION" \
-  -t "syno-amdgpu-top-builder:${DSM_VERSION}" \
+  -t "dante90/syno-amdgpu-top-builder:${DSM_VERSION}" \
   -f "$ROOT/docker/Dockerfile" "$ROOT"

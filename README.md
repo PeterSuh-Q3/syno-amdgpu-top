@@ -4,7 +4,7 @@ Synology DSM용 독립형 `amdgpu_top` GPU 모니터 SPK.
 
 ## Reproducible builder
 
-AMD 런타임은 Docker 기반의 전용 이미지 `syno-amdgpu-top-builder:7.4`에서 빌드합니다. 이미지가 없으면 아래 빌드 명령이 자동 생성합니다.
+AMD 런타임은 Docker Hub의 전용 이미지 `dante90/syno-amdgpu-top-builder:7.4`에서 빌드합니다. 이미지가 없으면 아래 빌드 명령이 자동으로 pull하며, 공개 이미지 조회가 실패할 때만 로컬 Dockerfile로 재생성합니다.
 
 ```bash
 ./scripts/fetch-sources.sh
