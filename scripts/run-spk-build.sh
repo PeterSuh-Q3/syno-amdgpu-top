@@ -21,9 +21,11 @@ fi
 
 SUDO=()
 docker info >/dev/null 2>&1 || SUDO=(sudo)
-"${SUDO[@]}" docker run --rm -t -u 0 \
+"${SUDO[@]}" docker run --rm -u 0 \
   -v "$ROOT:/work" \
-  -e PLATFORM -e DSM_VERSION \
+  -e PLATFORM="$PLATFORM" -e DSM_VERSION="$DSM_VERSION" \
   -e COMPILE_JOBS="${COMPILE_JOBS:-}" \
   "$BUILDER_IMAGE" \
   bash /work/scripts/build-runtime.sh
+
+"$ROOT/scripts/create-runtime-bundle.sh" "$ROOT/work/${PLATFORM}-${DSM_VERSION}/stage" kernel5.10.55

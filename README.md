@@ -13,6 +13,8 @@ AMD 런타임은 Docker Hub의 전용 이미지 `dante90/syno-amdgpu-top-builder
 
 이미지 구성과 수동 생성 방법은 [빌드 문서](docs/build.md)를 참조하세요. Intel 빌더와 마찬가지로 `syno-compiler:7.4`의 `/opt/kvmx64`만 복사하며, `libdrm`과 Rust 기반 `amdgpu_top`을 빌드하는 데 필요한 도구만 포함합니다. Mesa/LLVM/VA-API는 포함하지 않습니다.
 
+빌드가 완료되면 SPK와 함께 `syno-amdgpu-top-runtime-*-kernel5.10.55.tar.gz` 및 sidecar `*.manifest.json`도 `dist/`에 생성됩니다. runtime bundle은 Manager 내장용이며 `amdgpu_top`, 전용 libdrm, DRM ID 데이터와 archive/file SHA-256 검증 정보를 포함합니다.
+
 [syno-amdgpu-driver](https://github.com/PeterSuh-Q3/syno-amdgpu-driver)(AMD VA-API/RADV Vulkan 런타임)에서 `amdgpu_top`만 분리한 패키지입니다. `amdgpu_top`은 `libdrm_amdgpu`를 통해 커널의 `amdgpu.ko` 드라이버와 DRM ioctl/sysfs로 직접 통신하는 **모니터링 전용 도구**로, Mesa(RadeonSI/RADV)나 libva 같은 무거운 렌더링/트랜스코딩 스택에 전혀 의존하지 않습니다. 그래서:
 
 - GPU 사용률, VRAM, 클럭, 온도, 팬, 프로세스별 GPU 점유율을 보는 것만이 목적이라면 이 패키지 하나로 충분합니다.
