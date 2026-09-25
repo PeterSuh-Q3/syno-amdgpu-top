@@ -13,6 +13,7 @@ validation.
 | `syno-amdgpu-top` v0.1.1 K4 SPK | `ad9ef91a4bc5b765823309b3e02b672b3f7a549f015e3cbb3efe0b5128e979d3` | Published; build provenance and K4 stability need renewed validation |
 | `syno-amdgpu-top` v0.1.1 K5 SPK/runtime bundle | `939cda71bc14e8425bd4adecea05821f5166ef28172cc552cfc84c62df668145` | Matches current kvmx64 build stage |
 | `syno-amdgpu-driver` v0.5.2 K4 and K5 SPKs | `3f3844bc681cc7b51201a5ef45f1689aaf62bb9c16fba06ff0729c74b83b9cae` | Legacy duplicate; same ELF in both packages, matching the 2026-09-24 EPYC7002 pilot stage |
+| `mshell-manager` v1.4.2 embedded AMD runtime | `939cda71bc14e8425bd4adecea05821f5166ef28172cc552cfc84c62df668145` | K5 ELF is present on the K4 test NAS as well |
 
 The v0.1.1 K4 and K5 top SPKs contain different ELFs. The current
 `repackage-kernel-flavors.sh` creates both flavors from one input SPK without
@@ -20,6 +21,19 @@ recompilation, so it does not guarantee that distinct K4 and K5 payloads
 are retained. Hash matching proves which bytes were packaged, not which
 kernel is safe to run them on. A timeout cannot terminate a process blocked
 in kernel `D` state.
+
+### K4 test NAS baseline
+
+On 2026-09-25, the recovered DSM 7.4.1 kernel 4.4.302+ NAS at
+`192.168.45.17` exposed AMD Renoir `1002:1636` and `/dev/dri/renderD128`.
+The installed standalone K4 ELF matched the published v0.1.1 K4 hash above;
+the Manager's embedded ELF matched the K5 hash. No `amdgpu_top` process or
+new recursive fault was present at inspection. However, this boot had already
+logged `SMU driver if version not matched`, `dpm has been disabled`, and two
+`enable gfxoff timeout and failed` messages before any test invocation.
+Those baseline driver/firmware errors prevent attributing earlier lockups to
+one user-space ELF alone. Preserve the boot log and establish a clean DRM
+baseline before the next one-process K4 runtime test.
 
 ## Consumer plan (not yet implemented)
 
