@@ -46,6 +46,8 @@ amdgpu_top
 ./scripts/repackage-kernel-flavors.sh dist/syno-amdgpu-top-<version>-7.4-x86_64-kernel5.10.55.spk kvmx64 7.4
 ```
 
+바이너리 출처와 파생 패키지의 사용 규칙은 [런타임 관리 설계](docs/runtime-governance.md)에 기록합니다.
+
 ## 라이선스
 
 MIT — [LICENSE](LICENSE) 참고.
