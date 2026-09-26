@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-# Build the dedicated, reproducible amdgpu_top DSM cross-builder.
+# Build the dedicated native x86_64 amdgpu_top builder.
 set -euo pipefail
-
-DSM_VERSION=${1:-7.4}
-[[ $DSM_VERSION == 7.4 ]] || { echo 'Supported builder profile: 7.4' >&2; exit 2; }
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 
@@ -17,6 +14,6 @@ if ! command -v docker-credential-desktop >/dev/null 2>&1 && \
   export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
 fi
 
-docker build --build-arg "DSM_VERSION=$DSM_VERSION" \
-  -t "dante90/syno-amdgpu-top-builder:${DSM_VERSION}" \
+docker build --platform linux/amd64 \
+  -t "${BUILDER_IMAGE:-syno-amdgpu-top-builder:generic-x86_64}" \
   -f "$ROOT/docker/Dockerfile" "$ROOT"

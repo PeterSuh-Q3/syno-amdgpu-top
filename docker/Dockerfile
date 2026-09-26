@@ -1,15 +1,8 @@
-ARG DSM_VERSION=7.4
-FROM dante90/syno-compiler:${DSM_VERSION} AS synology-toolchain
-
 FROM debian:12-slim
 
-# The released AMD monitor is the portable DSM x86_64 kvmx64 build.  Copy only
-# that representative Synology toolchain, as syno-intel-gpu-top does, rather
-# than cloning every /opt platform into Docker Desktop.
-#
-# Unlike syno-amdgpu-driver this image deliberately excludes LLVM, Mesa and
-# VA-API: amdgpu_top only needs libdrm, Meson/Ninja and Rust/Cargo.
-COPY --from=synology-toolchain /opt/kvmx64 /opt/kvmx64
+# amdgpu_top/libdrm are userspace x86_64 projects. Build natively instead of
+# binding the artifact to a Synology platform toolchain. DSM support remains
+# bounded by package metadata and the userspace ABI; no Mesa/LLVM/VA-API here.
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean \
     && apt-get update \
@@ -17,6 +10,8 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean \
       build-essential \
       ca-certificates \
       curl \
+      libpciaccess-dev \
+      libudev-dev \
       meson \
       ninja-build \
       pkg-config \

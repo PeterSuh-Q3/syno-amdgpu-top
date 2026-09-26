@@ -9,11 +9,10 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 PACKAGE=syno-amdgpu-top
 OUT=$ROOT/dist
 ASSEMBLY=$ROOT/work/spk-${PLATFORM}-${DSM_VERSION}
-# kvmx64 is Synology's virtual-platform identifier and must remain in INFO's
-# arch field. Use the clearer CPU-architecture suffix for the distributable
-# filename so it is not mistaken for a hardware model.
+# The generic x86_64 userspace build covers the supported DSM platform IDs.
+# The artifact name deliberately carries neither DSM nor kernel labels.
 case "$PLATFORM" in
-  kvmx64)
+  x86_64|kvmx64)
     FILE_ARCH=x86_64
     # This is the portable DSM 7.4 x86_64 build. amdgpu_top is userspace-only;
     # kernel compatibility remains the responsibility of each platform's
@@ -34,9 +33,8 @@ esac
 rm -rf "$ASSEMBLY"
 mkdir -p "$ASSEMBLY/scripts" "$ASSEMBLY/conf"
 cp "$ROOT/spk/INFO" "$ASSEMBLY/INFO"
-# The same source metadata template is used for every toolchain target. DSM
-# uses INFO's arch field during installation, so replace the template value
-# with the platform actually being packaged.
+# DSM uses INFO's arch field during installation, so replace the template
+# value with the platform(s) represented by this binary.
 sed -i -E "s/^arch=\"[^\"]*\"$/arch=\"$PACKAGE_ARCHES\"/" "$ASSEMBLY/INFO"
 VERSION=$(sed -n 's/^version="\([^"]*\)"$/\1/p' "$ASSEMBLY/INFO" | head -n 1)
 [[ -n $VERSION ]] || { echo 'Missing package version in INFO' >&2; exit 2; }
@@ -51,7 +49,16 @@ case "$KERNEL_FLAVOR" in
 #!/bin/sh
 set -eu
 RUNTIME=/var/packages/syno-amdgpu-top/target
-if [ ! -c /dev/dri/renderD128 ] || [ "$(cat /sys/class/drm/renderD128/device/vendor 2>/dev/null || true)" != "0x1002" ]; then
+AMD_RENDER_NODE=
+for node in /dev/dri/renderD*; do
+  [ -c "$node" ] || continue
+  vendor=$(cat "/sys/class/drm/${node##*/}/device/vendor" 2>/dev/null || true)
+  if [ "$vendor" = "0x1002" ]; then
+    AMD_RENDER_NODE=$node
+    break
+  fi
+done
+if [ -z "$AMD_RENDER_NODE" ]; then
   echo "Notice: no AMD DRM render node; amdgpu_top installed without PATH integration." >&2
   exit 0
 fi
@@ -100,6 +107,10 @@ members=(INFO package.tgz scripts conf)
 for icon in PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG; do
   [[ -f "$ASSEMBLY/$icon" ]] && members+=("$icon")
 done
-SPK="$OUT/${PACKAGE}-${VERSION}-${DSM_VERSION}-${FILE_ARCH}-${KERNEL_FLAVOR}.spk"
+if [[ $PLATFORM == x86_64 ]]; then
+  SPK="$OUT/${PACKAGE}-${VERSION}-${FILE_ARCH}.spk"
+else
+  SPK="$OUT/${PACKAGE}-${VERSION}-${DSM_VERSION}-${FILE_ARCH}-${KERNEL_FLAVOR}.spk"
+fi
 tar -C "$ASSEMBLY" -cf "$SPK" "${members[@]}"
 echo "Built $SPK"

@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+RUNTIME=/var/packages/syno-amdgpu-top/target
+for node in /dev/dri/renderD*; do
+  [ -c "$node" ] || continue
+  [ "$(cat "/sys/class/drm/${node##*/}/device/vendor" 2>/dev/null || true)" = "0x1002" ] || continue
+  [ -x "$RUNTIME/bin/helper/amdgpu-path-helper" ] && "$RUNTIME/bin/helper/amdgpu-path-helper" install || true
+  break
+done
+exit 0

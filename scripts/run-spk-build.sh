@@ -1,31 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DSM_VERSION=${1:-7.4}
-PLATFORM=${2:-kvmx64}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-# Dedicated AMD monitor builder.  It has the DSM toolchains plus only the
-# libdrm/Rust build dependencies; it intentionally excludes Mesa/LLVM/VA-API.
-BUILDER_IMAGE=${BUILDER_IMAGE:-dante90/syno-amdgpu-top-builder:${DSM_VERSION}}
-
-[[ $PLATFORM == kvmx64 ]] || {
-  echo 'This compact builder contains only the kvmx64 toolchain; use kvmx64.' >&2
-  exit 2
-}
-
-"$ROOT/scripts/generate-cross-file.sh" "$PLATFORM" "$DSM_VERSION" >/dev/null
+BUILD_ID=generic-x86_64-0.1.2
+KERNEL_FLAVOR=${KERNEL_FLAVOR:-kernel5.10.55}
+BUILDER_IMAGE=${BUILDER_IMAGE:-syno-amdgpu-top-builder:generic-x86_64}
 
 if ! docker image inspect "$BUILDER_IMAGE" >/dev/null 2>&1; then
-  docker pull "$BUILDER_IMAGE" || "$ROOT/scripts/build-builder.sh" "$DSM_VERSION"
+  "$ROOT/scripts/build-builder.sh"
 fi
 
 SUDO=()
 docker info >/dev/null 2>&1 || SUDO=(sudo)
-"${SUDO[@]}" docker run --rm -u 0 \
+"${SUDO[@]}" docker run --rm --platform linux/amd64 -u 0 \
   -v "$ROOT:/work" \
-  -e PLATFORM="$PLATFORM" -e DSM_VERSION="$DSM_VERSION" \
+  -e BUILD_ID="$BUILD_ID" -e KERNEL_FLAVOR="$KERNEL_FLAVOR" \
+  -e CARGO_HOME=/work/work/cargo-home \
   -e COMPILE_JOBS="${COMPILE_JOBS:-}" \
   "$BUILDER_IMAGE" \
   bash /work/scripts/build-runtime.sh
 
-"$ROOT/scripts/create-runtime-bundle.sh" "$ROOT/work/${PLATFORM}-${DSM_VERSION}/stage" kernel5.10.55
+if [[ ${BUILD_RUNTIME_BUNDLE:-0} == 1 ]]; then
+  "$ROOT/scripts/create-runtime-bundle.sh" "$ROOT/work/${BUILD_ID}/stage" "$KERNEL_FLAVOR"
+fi

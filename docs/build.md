@@ -4,17 +4,16 @@
 
 ## Build container prerequisites
 
-이 저장소는 Docker Hub 전용 이미지 `dante90/syno-amdgpu-top-builder:7.4`를 사용합니다.
-기반은 `dante90/syno-compiler:7.4`이며, Intel 빌더와 같이 그 안의 `/opt/kvmx64`만 가져온 뒤 깨끗한 Debian 12 레이어에 필요한 도구만 설치합니다. 이미지 정의는 [`docker/Dockerfile`](../docker/Dockerfile)에 있으므로 Docker Desktop 또는 Linux Docker 환경에서 같은 결과를 재현할 수 있습니다.
+이 저장소는 KVM64/Synology 툴체인 교차 컴파일을 사용하지 않습니다. Docker의 Debian 12 x86_64 환경에서 `libdrm`과 `amdgpu_top`을 네이티브 빌드합니다. 두 구성 요소는 사용자 공간 x86_64 바이너리이며 커널 모듈이나 플랫폼별 커널 헤더에 링크되지 않습니다. 이미지 정의는 [`docker/Dockerfile`](../docker/Dockerfile)에 있습니다.
 
 - Meson, Ninja, pkg-config
 - Rust/Cargo 및 `x86_64-unknown-linux-gnu` Rust target
-- 각 DSM 플랫폼의 Synology 툴체인 (`/opt/<platform>`)
+- 네이티브 x86_64 C/C++ 컴파일러와 시스템 개발 헤더
 
-LLVM, Mesa, libva, OpenCL은 이미지에 포함하지 않습니다. 즉, 기존 `syno-amdgpu-driver` 공용 빌더보다 작고 목적이 분명합니다. 최초 `run-spk-build.sh` 실행 시 이미지가 없으면 Docker Hub에서 자동으로 pull하며, 수동으로 Dockerfile을 빌드하려면 아래를 실행합니다.
+LLVM, Mesa, libva, OpenCL은 이미지에 포함하지 않습니다. `run-spk-build.sh` 실행 시 로컬 builder image가 없으면 Dockerfile로 생성합니다.
 
 ```bash
-./scripts/build-builder.sh 7.4
+./scripts/build-builder.sh
 ```
 
 현재 AMD 런타임의 최초 빌드 기록은 `192.168.45.228` Docker 호스트에서 수행됐습니다. 호스트 OS는 빌드 결과에 영향을 주지 않으며, Docker 엔진과 이 Dockerfile이 재현 가능한 빌드 환경을 정의합니다.
@@ -39,34 +38,21 @@ sources/amdgpu_top
 ## Build
 
 ```bash
-./scripts/run-spk-build.sh 7.4 kvmx64
+./scripts/run-spk-build.sh
 ```
 
 이미지를 명시적으로 바꾸어 시험할 때만 다음 환경 변수를 사용합니다.
 
 ```bash
-BUILDER_IMAGE=my-amdgpu-builder:7.4 ./scripts/run-spk-build.sh 7.4 kvmx64
+BUILDER_IMAGE=my-amdgpu-builder:generic-x86_64 ./scripts/run-spk-build.sh
 ```
 
-이 경량 이미지는 의도적으로 `kvmx64`만 포함하므로, 두 번째 인자는 항상 `kvmx64`여야 합니다. `amdgpu_top`은 사용자 공간 x86_64 도구이며, DSM 패키지의 지원 플랫폼 목록은 별도로 관리됩니다.
+패키지 버전 0.1.2의 산출물은 `dist/syno-amdgpu-top-0.1.2-x86_64.spk`입니다. 파일명에는 DSM/커널 버전이 포함되지 않으며, `INFO`의 플랫폼 목록과 DSM 최소 버전은 별도로 관리됩니다. 선언된 최소 DSM은 7.2입니다. DSM 7.2 이하 및 K4 환경의 실기 검증은 별도 확인 대상입니다.
 
-`dist/syno-amdgpu-top-<version>-7.4-x86_64-kernel5.10.55.spk`와 `...-kernel4.4.x.spk`가 생성됩니다.
-
-## 패키지 통합 코드만 바뀐 경우 (재컴파일 불필요)
-
-`spk/scripts/*`, `spk/conf/*`, `spk/package/bin/helper/amdgpu-path-helper.c`처럼 패키징 계층만 바뀌었다면, 이미 빌드된 SPK를 재사용해 훨씬 빠르게 재패키징할 수 있습니다.
+Manager 내장용 runtime bundle도 함께 만들 필요가 있을 때만 다음처럼 요청합니다.
 
 ```bash
-# 커널 플레이버 하나만
-./scripts/repackage-existing-spk.sh dist/syno-amdgpu-top-<version>-7.4-x86_64-kernel5.10.55.spk kvmx64 7.4 kernel5.10.55
-
-# kernel5.10.55 / kernel4.4.x 둘 다
-./scripts/repackage-kernel-flavors.sh dist/syno-amdgpu-top-<version>-7.4-x86_64-kernel5.10.55.spk kvmx64 7.4
+BUILD_RUNTIME_BUNDLE=1 ./scripts/run-spk-build.sh
 ```
 
-## 커널별 정책
-
-- `kernel5.10.55`: `amdgpu_top`을 `/usr/bin`에 정상 등록. 심볼릭 링크가 누락되면 `start-stop-status`가 패키지 시작 시마다 자가 치유.
-- `kernel4.4.x`: 바이너리는 포함하되 `/usr/bin`에 등록하지 않음 (진단용). `start-stop-status`에 자가 치유 로직 자체가 없음.
-
-두 플레이버 모두 AMD DRM render node(`renderD128`의 PCI vendor `0x1002`)가 없으면 postinst/start-stop-status가 조기 종료(no-op)합니다.
+단일 SPK가 `/dev/dri/renderD*` 노드를 모두 검색하고, AMD render node(PCI vendor `0x1002`)가 있으면 `/usr/bin/amdgpu_top` 심볼릭 링크를 생성합니다. K4/K5 실행 안정성은 동일하다고 가정하지 않으며, K4에서의 구체적인 동작 검증은 별도 과제입니다.

@@ -13,10 +13,15 @@ PREFIX=/var/packages/syno-amdgpu-top/target
 TOOLCHAIN=${TOOLCHAIN_BIN:-/opt/${PLATFORM}/bin}/x86_64-pc-linux-gnu-gcc
 
 [[ -d "$STAGE$PREFIX" ]] || { echo "Missing staged runtime: $STAGE$PREFIX" >&2; exit 2; }
-[[ -x $TOOLCHAIN ]] || { echo "Synology toolchain missing for $PLATFORM" >&2; exit 2; }
+if [[ $PLATFORM == x86_64 ]]; then
+  HELPER_CC=${HELPER_CC:-cc}
+else
+  [[ -x $TOOLCHAIN ]] || { echo "Synology toolchain missing for $PLATFORM" >&2; exit 2; }
+  HELPER_CC=$TOOLCHAIN
+fi
 
 mkdir -p "$STAGE$PREFIX/bin/helper"
-"$TOOLCHAIN" -O2 -Wall -Wextra -Werror \
+"$HELPER_CC" -O2 -Wall -Wextra -Werror \
   "$ROOT/spk/package/bin/helper/amdgpu-path-helper.c" \
   -o "$STAGE$PREFIX/bin/helper/amdgpu-path-helper"
 # Package lifecycle scripts run as the package account on DSM. This narrow

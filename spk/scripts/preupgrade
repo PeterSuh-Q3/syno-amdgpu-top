@@ -1,0 +1,4 @@
+#!/bin/sh
+# This package has no running daemon to stop. Keep the upgrade hook present so
+# DSM can upgrade installations created by earlier releases without uninstalling.
+exit 0
