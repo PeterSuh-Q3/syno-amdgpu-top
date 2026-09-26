@@ -10,9 +10,7 @@
 - When an AMD render node is found, the package safely creates `/usr/bin/amdgpu_top`; upgrade and package-start hooks retry link creation if needed.
 - The package contains the standalone monitor and its required libdrm runtime files. It does not install a kernel driver, Mesa, VA-API, or a transcoding stack.
 
-Verified on a SA6400 running DSM 7.4.1 / Linux 5.10.55 with Intel and AMD DRM devices: package installation succeeded, AMD was found at `renderD129`, the `/usr/bin/amdgpu_top` link was created, and the command's `--help` check passed.
-
-Kernel 4.x runtime stability is not implied by this x86_64 userspace package and should be validated separately with the target kernel driver.
+Verified on DSM 7.4.1 with Linux 5.10.55 and Linux 4.4.302. Package installation, AMD render-node detection, `/usr/bin/amdgpu_top` link creation, and stable operation were confirmed on both kernel versions.
 
 ## 한국어
 
@@ -24,6 +22,4 @@ Kernel 4.x runtime stability is not implied by this x86_64 userspace package and
 - AMD 렌더 노드를 찾으면 `/usr/bin/amdgpu_top` 심볼릭 링크를 안전하게 생성합니다. 업그레이드 및 패키지 시작 훅도 링크 생성을 재시도합니다.
 - 독립 모니터와 필요한 libdrm 런타임 파일을 포함합니다. 커널 드라이버, Mesa, VA-API 또는 트랜스코딩 스택을 설치하지 않습니다.
 
-DSM 7.4.1 / Linux 5.10.55를 실행하는 SA6400에서 Intel·AMD DRM 장치가 함께 있는 상태로 검증했습니다. 설치가 성공했고, AMD 장치가 `renderD129`로 검색되었으며 `/usr/bin/amdgpu_top` 링크 생성 및 명령의 `--help` 실행을 확인했습니다.
-
-이 x86_64 사용자 공간 패키지가 커널 4.x에서의 실행 안정성까지 보장하는 것은 아닙니다. 해당 커널과 드라이버 조합은 별도 검증이 필요합니다.
+DSM 7.4.1의 Linux 5.10.55 및 Linux 4.4.302 환경에서 검증을 완료했습니다. 두 커널 버전 모두에서 패키지 설치, AMD 렌더 노드 탐색, `/usr/bin/amdgpu_top` 링크 생성과 안정적인 동작을 확인했습니다.
