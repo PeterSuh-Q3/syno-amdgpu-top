@@ -21,5 +21,6 @@ docker info >/dev/null 2>&1 || SUDO=(sudo)
   bash /work/scripts/build-runtime.sh
 
 if [[ ${BUILD_RUNTIME_BUNDLE:-0} == 1 ]]; then
-  "$ROOT/scripts/create-runtime-bundle.sh" "$ROOT/work/${BUILD_ID}/stage" "$KERNEL_FLAVOR"
+  VERSION=$(sed -n 's/^version="\([^"]*\)"$/\1/p' "$ROOT/spk/INFO" | head -n 1)
+  "$ROOT/scripts/create-runtime-bundle.sh" "$ROOT/dist/syno-amdgpu-top-${VERSION}-x86_64.spk"
 fi
