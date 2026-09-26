@@ -9,6 +9,7 @@
 - Installation scans all `/dev/dri/renderD*` nodes for an AMD GPU, so mixed Intel+AMD systems work even when the AMD device is not `renderD128`.
 - When an AMD render node is found, the package safely creates `/usr/bin/amdgpu_top`; upgrade and package-start hooks retry link creation if needed.
 - The package contains the standalone monitor and its required libdrm runtime files. It does not install a kernel driver, Mesa, VA-API, or a transcoding stack.
+- A kernel-agnostic x86_64 runtime bundle is available for other projects to embed, with a manifest containing source and per-file SHA-256 checksums.
 
 Verified on DSM 7.4.1 with Linux 5.10.55 and Linux 4.4.302. Package installation, AMD render-node detection, `/usr/bin/amdgpu_top` link creation, and stable operation were confirmed on both kernel versions.
 
@@ -21,5 +22,6 @@ Verified on DSM 7.4.1 with Linux 5.10.55 and Linux 4.4.302. Package installation
 - `/dev/dri/renderD*` 노드를 모두 검색해 AMD GPU를 찾습니다. 따라서 Intel과 AMD가 함께 있고 AMD가 `renderD128`이 아닌 노드에 연결된 시스템도 처리합니다.
 - AMD 렌더 노드를 찾으면 `/usr/bin/amdgpu_top` 심볼릭 링크를 안전하게 생성합니다. 업그레이드 및 패키지 시작 훅도 링크 생성을 재시도합니다.
 - 독립 모니터와 필요한 libdrm 런타임 파일을 포함합니다. 커널 드라이버, Mesa, VA-API 또는 트랜스코딩 스택을 설치하지 않습니다.
+- 다른 프로젝트가 포함해 사용할 수 있도록 커널 비종속 x86_64 runtime bundle도 제공합니다. manifest에는 소스 및 파일별 SHA-256 체크섬을 기록했습니다.
 
 DSM 7.4.1의 Linux 5.10.55 및 Linux 4.4.302 환경에서 검증을 완료했습니다. 두 커널 버전 모두에서 패키지 설치, AMD 렌더 노드 탐색, `/usr/bin/amdgpu_top` 링크 생성과 안정적인 동작을 확인했습니다.
