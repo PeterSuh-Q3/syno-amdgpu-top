@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Produce both DSM kernel-policy packages from one already-built x86_64 SPK.
+# Historical entry point: produce one kernel-agnostic x86_64 SPK.
 # No libdrm/amdgpu_top recompilation is performed.
 set -euo pipefail
 
@@ -8,5 +8,4 @@ PLATFORM=${2:-kvmx64}
 DSM_VERSION=${3:-7.4}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 
-"$ROOT/scripts/repackage-existing-spk.sh" "$INPUT" "$PLATFORM" "$DSM_VERSION" kernel5.10.55
-"$ROOT/scripts/repackage-existing-spk.sh" "$INPUT" "$PLATFORM" "$DSM_VERSION" kernel4.4.x
+"$ROOT/scripts/repackage-existing-spk.sh" "$INPUT" "$PLATFORM" "$DSM_VERSION"

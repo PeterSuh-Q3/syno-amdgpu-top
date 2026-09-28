@@ -2,8 +2,7 @@
 set -euo pipefail
 
 ROOT=${ROOT:-/work}
-BUILD_ID=${BUILD_ID:-generic-x86_64-0.1.2}
-KERNEL_FLAVOR=${KERNEL_FLAVOR:-kernel5.10.55}
+BUILD_ID=${BUILD_ID:-generic-x86_64-0.1.3}
 PREFIX=/var/packages/syno-amdgpu-top/target
 BUILD_ROOT=$ROOT/work/${BUILD_ID}
 SOURCE_ROOT=$ROOT/sources
@@ -78,5 +77,5 @@ popd >/dev/null
 # DSM applies root ownership and setuid only to the explicitly declared
 # privilege tool. Refresh this integration file immediately before packaging
 # so package-only updates remain reproducible.
-"$ROOT/scripts/refresh-spk-stage.sh" "$STAGE" x86_64 7.4 "$KERNEL_FLAVOR"
+"$ROOT/scripts/refresh-spk-stage.sh" "$STAGE" x86_64 7.4
 progress complete success

@@ -13,7 +13,7 @@ Synology DSM용 독립형 `amdgpu_top` GPU 모니터 SPK.
 
 이미지 구성과 수동 생성 방법은 [빌드 문서](docs/build.md)를 참조하세요. 빌더는 libdrm과 Rust 기반 `amdgpu_top`의 빌드 도구만 포함하며 Mesa/LLVM/VA-API는 포함하지 않습니다.
 
-빌드가 완료되면 `dist/syno-amdgpu-top-0.1.2-x86_64.spk`가 생성됩니다. SPK 이름에는 DSM 버전이나 커널 버전을 넣지 않습니다. Manager 내장용 runtime bundle이 필요할 때만 `BUILD_RUNTIME_BUNDLE=1 ./scripts/run-spk-build.sh`로 별도 생성할 수 있습니다.
+빌드가 완료되면 `dist/syno-amdgpu-top-0.1.3-x86_64.spk`가 생성됩니다. SPK 이름에는 DSM 버전이나 커널 버전을 넣지 않습니다. 파생 패키지용 runtime bundle이 필요할 때는 `BUILD_RUNTIME_BUNDLE=1 ./scripts/run-spk-build.sh`로 함께 생성할 수 있습니다.
 
 패키지 메타데이터의 최소 DSM은 7.2로 설정했습니다. 실제 설치 검증은 DSM 7.4.1에서 진행 중이며, DSM 7.2 및 커널 4.x 환경은 별도 실기 검증이 필요합니다.
 
@@ -31,7 +31,7 @@ amdgpu_top
 `/usr/bin/amdgpu_top` 심볼릭 링크가 자동으로 등록됩니다. 패키지는 `/dev/dri/renderD*` 노드를 모두 검색하므로, AMD 노드 번호가 `renderD128`이 아니어도 찾습니다. AMD DRM render node가 없는 NAS(Intel iGPU만 있는 경우 등)에서는 설치는 되지만 PATH 등록 없이 no-op으로 끝납니다.
 
 > [!WARNING]
-> v0.1.2는 DSM 7.4.1의 커널 5.10.55 및 4.4.302 환경에서 설치·링크 생성·실행을 검증했습니다. 커널 버전만으로 모든 AMD DRM 백포트와 GPU의 호환성이 보장되는 것은 아닙니다.
+> v0.1.2는 DSM 7.4.1의 커널 5.10.55 및 4.4.302 환경에서 설치·링크 생성·실행을 검증했습니다. v0.1.3은 동일한 범용 PATH 정책으로 패키징하며, 새 SPK의 실기 재검증은 별도입니다. 커널 버전만으로 모든 AMD DRM 백포트와 GPU의 호환성이 보장되는 것은 아닙니다.
 
 ## 빌드
 

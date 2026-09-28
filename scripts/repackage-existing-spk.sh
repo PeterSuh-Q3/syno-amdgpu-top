@@ -7,7 +7,6 @@ set -euo pipefail
 INPUT=${1:?existing SPK required}
 PLATFORM=${2:?platform required}
 DSM_VERSION=${3:?DSM version required}
-KERNEL_FLAVOR=${4:-kernel5.10.55}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 PACKAGE=syno-amdgpu-top
 WORK="$ROOT/work/repackage-${PLATFORM}-${DSM_VERSION}"
@@ -31,4 +30,4 @@ chmod 0755 "$TARGET/bin/helper/amdgpu-path-helper"
 chown root:root "$TARGET/bin/helper/amdgpu-path-helper"
 chmod 4755 "$TARGET/bin/helper/amdgpu-path-helper"
 
-"$ROOT/scripts/package-spk.sh" "$STAGE" "$PLATFORM" "$DSM_VERSION" "$KERNEL_FLAVOR"
+"$ROOT/scripts/package-spk.sh" "$STAGE" "$PLATFORM" "$DSM_VERSION"

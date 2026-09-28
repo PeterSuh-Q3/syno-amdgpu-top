@@ -47,7 +47,7 @@ sources/amdgpu_top
 BUILDER_IMAGE=my-amdgpu-builder:generic-x86_64 ./scripts/run-spk-build.sh
 ```
 
-패키지 버전 0.1.2의 산출물은 `dist/syno-amdgpu-top-0.1.2-x86_64.spk`입니다. 파일명에는 DSM/커널 버전이 포함되지 않으며, `INFO`의 플랫폼 목록과 DSM 최소 버전은 별도로 관리됩니다. 선언된 최소 DSM은 7.2입니다. DSM 7.4.1의 K4(4.4.302)와 K5(5.10.55)는 실기 검증을 마쳤으며, DSM 7.2/7.3 전체에 대한 검증을 의미하지는 않습니다.
+패키지 버전 0.1.3의 산출물은 `dist/syno-amdgpu-top-0.1.3-x86_64.spk`입니다. 파일명에는 DSM/커널 버전이 포함되지 않으며, `INFO`의 플랫폼 목록과 DSM 최소 버전은 별도로 관리됩니다. 선언된 최소 DSM은 7.2입니다. 이전 v0.1.2는 DSM 7.4.1의 K4(4.4.302)와 K5(5.10.55) 실기에서 검증됐습니다. 이는 새 v0.1.3 SPK나 DSM 7.2/7.3 전체의 실기 검증을 의미하지는 않습니다.
 
 Manager 내장용 runtime bundle도 함께 만들 필요가 있을 때만 다음처럼 요청합니다.
 

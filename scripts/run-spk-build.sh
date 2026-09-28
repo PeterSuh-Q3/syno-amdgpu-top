@@ -2,8 +2,7 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-BUILD_ID=generic-x86_64-0.1.2
-KERNEL_FLAVOR=${KERNEL_FLAVOR:-kernel5.10.55}
+BUILD_ID=generic-x86_64-0.1.3
 BUILDER_IMAGE=${BUILDER_IMAGE:-syno-amdgpu-top-builder:generic-x86_64}
 
 if ! docker image inspect "$BUILDER_IMAGE" >/dev/null 2>&1; then
@@ -14,7 +13,7 @@ SUDO=()
 docker info >/dev/null 2>&1 || SUDO=(sudo)
 "${SUDO[@]}" docker run --rm --platform linux/amd64 -u 0 \
   -v "$ROOT:/work" \
-  -e BUILD_ID="$BUILD_ID" -e KERNEL_FLAVOR="$KERNEL_FLAVOR" \
+  -e BUILD_ID="$BUILD_ID" \
   -e CARGO_HOME=/work/work/cargo-home \
   -e COMPILE_JOBS="${COMPILE_JOBS:-}" \
   "$BUILDER_IMAGE" \

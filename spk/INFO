@@ -1,5 +1,5 @@
 package="syno-amdgpu-top"
-version="0.1.2"
+version="0.1.3"
 displayname="Synology AMDGPU Top"
 description="Standalone native x86_64 amdgpu_top GPU monitor for supported DSM platforms (no Mesa/VA-API runtime)."
 arch="epyc7002"

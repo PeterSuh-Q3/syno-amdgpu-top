@@ -7,7 +7,6 @@ set -euo pipefail
 STAGE=${1:?staging root required}
 PLATFORM=${2:?platform required}
 DSM_VERSION=${3:?DSM version required}
-KERNEL_FLAVOR=${4:-${KERNEL_FLAVOR:-kernel5.10.55}}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 PREFIX=/var/packages/syno-amdgpu-top/target
 TOOLCHAIN=${TOOLCHAIN_BIN:-/opt/${PLATFORM}/bin}/x86_64-pc-linux-gnu-gcc
@@ -30,4 +29,4 @@ mkdir -p "$STAGE$PREFIX/bin/helper"
 chown root:root "$STAGE$PREFIX/bin/helper/amdgpu-path-helper"
 chmod 4755 "$STAGE$PREFIX/bin/helper/amdgpu-path-helper"
 
-"$ROOT/scripts/package-spk.sh" "$STAGE" "$PLATFORM" "$DSM_VERSION" "$KERNEL_FLAVOR"
+"$ROOT/scripts/package-spk.sh" "$STAGE" "$PLATFORM" "$DSM_VERSION"

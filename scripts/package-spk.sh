@@ -4,7 +4,6 @@ set -euo pipefail
 STAGE=${1:?staging root required}
 PLATFORM=${2:?platform required}
 DSM_VERSION=${3:?DSM version required}
-KERNEL_FLAVOR=${4:-kernel5.10.55}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 PACKAGE=syno-amdgpu-top
 OUT=$ROOT/dist
@@ -25,11 +24,6 @@ case "$PLATFORM" in
     ;;
 esac
 
-case "$KERNEL_FLAVOR" in
-  kernel5.10.55|kernel4.4.x) ;;
-  *) echo "Unsupported kernel flavor: $KERNEL_FLAVOR" >&2; exit 2 ;;
-esac
-
 rm -rf "$ASSEMBLY"
 mkdir -p "$ASSEMBLY/scripts" "$ASSEMBLY/conf"
 cp "$ROOT/spk/INFO" "$ASSEMBLY/INFO"
@@ -40,48 +34,6 @@ VERSION=$(sed -n 's/^version="\([^"]*\)"$/\1/p' "$ASSEMBLY/INFO" | head -n 1)
 [[ -n $VERSION ]] || { echo 'Missing package version in INFO' >&2; exit 2; }
 cp "$ROOT/spk/scripts/"* "$ASSEMBLY/scripts/"
 cp "$ROOT/spk/conf/"* "$ASSEMBLY/conf/"
-case "$KERNEL_FLAVOR" in
-  kernel4.4.x)
-    # Kernel 4.4's backported AMDGPU scheduler can fault when amdgpu_top
-    # closes its DRM context. Keep the binary for explicit diagnostics, but
-    # do not expose it through /usr/bin.
-    cat > "$ASSEMBLY/scripts/postinst" <<'EOF'
-#!/bin/sh
-set -eu
-RUNTIME=/var/packages/syno-amdgpu-top/target
-AMD_RENDER_NODE=
-for node in /dev/dri/renderD*; do
-  [ -c "$node" ] || continue
-  vendor=$(cat "/sys/class/drm/${node##*/}/device/vendor" 2>/dev/null || true)
-  if [ "$vendor" = "0x1002" ]; then
-    AMD_RENDER_NODE=$node
-    break
-  fi
-done
-if [ -z "$AMD_RENDER_NODE" ]; then
-  echo "Notice: no AMD DRM render node; amdgpu_top installed without PATH integration." >&2
-  exit 0
-fi
-test -x "$RUNTIME/bin/amdgpu_top"
-echo "Notice: kernel 4.4 keeps amdgpu_top as an experimental diagnostic tool; it is not registered in PATH." >&2
-EOF
-    chmod 0755 "$ASSEMBLY/scripts/postinst"
-    # start-stop-status normally self-heals the /usr/bin/amdgpu_top shim on
-    # every package start; kernel 4.4 must never create that shim, so ship a
-    # copy without the self-heal step instead of the shared spk/scripts one.
-    cat > "$ASSEMBLY/scripts/start-stop-status" <<'EOF'
-#!/bin/sh
-case "${1:-}" in
-  start|status) exit 0 ;;
-  stop) exit 0 ;;
-  log) exit 1 ;;
-  *) exit 1 ;;
-esac
-EOF
-    chmod 0755 "$ASSEMBLY/scripts/start-stop-status"
-    sed -i -E 's#^description=".*"$#description="Standalone amdgpu_top GPU monitor for DSM (kernel 4.4: experimental, not on PATH)."#' "$ASSEMBLY/INFO"
-    ;;
-esac
 for icon in PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG; do
   [[ -f "$ROOT/spk/$icon" ]] && cp "$ROOT/spk/$icon" "$ASSEMBLY/$icon"
 done
@@ -110,7 +62,7 @@ done
 if [[ $PLATFORM == x86_64 ]]; then
   SPK="$OUT/${PACKAGE}-${VERSION}-${FILE_ARCH}.spk"
 else
-  SPK="$OUT/${PACKAGE}-${VERSION}-${DSM_VERSION}-${FILE_ARCH}-${KERNEL_FLAVOR}.spk"
+  SPK="$OUT/${PACKAGE}-${VERSION}-${DSM_VERSION}-${FILE_ARCH}.spk"
 fi
 tar -C "$ASSEMBLY" -cf "$SPK" "${members[@]}"
 echo "Built $SPK"
