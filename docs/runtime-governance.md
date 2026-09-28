@@ -1,75 +1,45 @@
 # amdgpu_top runtime governance
 
-This document records the current binary audit and proposes how
-`syno-amdgpu-top` should become the source of the `amdgpu_top` executable,
-its private libdrm, and DSM kernel compatibility policy. A user-space ELF
-has no kernel-module `vermagic`; kernel labels need build records and runtime
-validation.
+## Current source of truth (v0.1.2)
 
-## Audited state (2026-09-25)
+[`syno-amdgpu-top` v0.1.2](https://github.com/PeterSuh-Q3/syno-amdgpu-top/releases/tag/v0.1.2)
+publishes one native x86_64 `amdgpu_top` runtime bundle and a per-file SHA-256
+manifest. The executable and its private libdrm libraries are built once;
+there are no separate K4/K5 binaries or Synology kvmx64 cross-compiler inputs.
+The standalone SPK is `syno-amdgpu-top-0.1.2-x86_64.spk` and declares DSM 7.2
+as its minimum version.
 
-| Artifact | `amdgpu_top` SHA-256 | Status |
-| --- | --- | --- |
-| `syno-amdgpu-top` v0.1.1 K4 SPK | `ad9ef91a4bc5b765823309b3e02b672b3f7a549f015e3cbb3efe0b5128e979d3` | Published; build provenance and K4 stability need renewed validation |
-| `syno-amdgpu-top` v0.1.1 K5 SPK/runtime bundle | `939cda71bc14e8425bd4adecea05821f5166ef28172cc552cfc84c62df668145` | Matches current kvmx64 build stage |
-| `syno-amdgpu-driver` v0.5.2 K4 and K5 SPKs | `3f3844bc681cc7b51201a5ef45f1689aaf62bb9c16fba06ff0729c74b83b9cae` | Legacy duplicate; same ELF in both packages, matching the 2026-09-24 EPYC7002 pilot stage |
-| `mshell-manager` v1.4.2 embedded AMD runtime | `939cda71bc14e8425bd4adecea05821f5166ef28172cc552cfc84c62df668145` | K5 ELF is present on the K4 test NAS as well |
+The v0.1.2 release reports installation, AMD render-node detection, PATH
+registration, and operation verified on DSM 7.4.1 with both Linux 5.10.55 and
+Linux 4.4.302 after the GPU module stabilization work. These are tested
+configurations, not a guarantee for every DRM backport or GPU. `amdgpu_top` is
+a user-space ELF and has no kernel-module
+`vermagic`; runtime compatibility depends on the installed AMD DRM driver and
+its ioctl/sysfs behavior.
 
-The v0.1.1 K4 and K5 top SPKs contain different ELFs. The current
-`repackage-kernel-flavors.sh` creates both flavors from one input SPK without
-recompilation, so it does not guarantee that distinct K4 and K5 payloads
-are retained. Hash matching proves which bytes were packaged, not which
-kernel is safe to run them on. A timeout cannot terminate a process blocked
-in kernel `D` state.
+| Consumer | Current integration |
+| --- | --- |
+| `syno-amdgpu-driver` | No bundled `amdgpu_top`; directs users to the standalone SPK. |
+| `mshell-manager` | Pins the v0.1.2 runtime archive and installs its files privately for the AMD console. |
+| `syno-gpu-monitor` AMD 0.4.4 | Pins the v0.1.2 runtime archive; verifies archive and manifest file hashes during packaging. |
 
-### K4 test NAS baseline
+The shared archive is
+`syno-amdgpu-top-runtime-0.1.2-x86_64.tar.gz` (SHA-256
+`e784dad38728591906532760bcdedd3a536f03aad80b5650c2cd206cdd482a7f`).
+Consumers should pin an exact release URL and archive checksum, verify the
+manifest's individual file hashes, and keep the private libraries with the
+executable. A consumer's telemetry permissions and polling policy remain its
+own responsibility.
 
-On 2026-09-25, the recovered DSM 7.4.1 kernel 4.4.302+ NAS at
-`192.168.45.17` exposed AMD Renoir `1002:1636` and `/dev/dri/renderD128`.
-The installed standalone K4 ELF matched the published v0.1.1 K4 hash above;
-the Manager's embedded ELF matched the K5 hash. No `amdgpu_top` process or
-new recursive fault was present at inspection. However, this boot had already
-logged `SMU driver if version not matched`, `dpm has been disabled`, and two
-`enable gfxoff timeout and failed` messages before any test invocation.
-Those baseline driver/firmware errors prevent attributing earlier lockups to
-one user-space ELF alone. Preserve the boot log and establish a clean DRM
-baseline before the next one-process K4 runtime test.
+## Historical audit (v0.1.1 and earlier)
 
-## Consumer plan (not yet implemented)
+The 2026-09-25 audit found different ELF hashes in the v0.1.1 K4 and K5 SPKs,
+and a duplicate `amdgpu_top` in older `syno-amdgpu-driver` packages. Those
+findings explain why the single-source runtime was introduced; they do not
+describe the current v0.1.2 release or its migrated consumers. Preserve old
+release assets for reproducibility rather than replacing their bytes in place.
 
-| Repository | Intended source | Kernel 4 policy | Kernel 5 policy |
-| --- | --- | --- | --- |
-| `syno-amdgpu-driver` | No `amdgpu_top` payload; users install this package separately | No bundled top | No bundled top |
-| `mshell-manager` | Pinned `syno-amdgpu-top` runtime bundle | Use direct DRM collector; do not invoke the embedded K5 top | Use pinned K5 bundle for console and JSON fallback |
-| `syno-gpu-monitor` | Pinned release artifacts from this repository | Direct DRM collector; keep K4 top diagnostic-only until validated | Use pinned K5 bundle for console and VRAM fallback |
-
-The current `mshell-manager` build embeds only the K5 runtime and uses it
-without a kernel gate. The current `syno-gpu-monitor` build embeds both
-flavors and selects one by `uname -r`. The current `syno-amdgpu-driver`
-source removes `amdgpu_top` through its refresh/repackage paths, while its
-released v0.5.2 K4 and K5 packages still contain the legacy duplicate.
-
-After K4 stability is resolved, each consumer should verify both its archive
-SHA-256 and the extracted ELF SHA-256. A shared release manifest should
-record source revision, toolchain image digest, kernel flavor, file digests,
-and runtime policy. Consumers should select an exact supported kernel rather
-than defaulting unknown kernels to the K5 binary. Until that manifest exists,
-the consumers keep their current pinned v0.1.1 URLs.
-
-## K4 release gate
-
-1. Rebuild K4 from locked source and recorded toolchain; compare the new ELF
-   with the published K4 hash or document and review the difference.
-2. Check `--json -n 1` and interactive startup on a K4 test NAS with one
-   collector process, then verify that exit leaves no `D`-state process,
-   kernel fault, or reboot hang.
-3. If K4 hangs or faults, isolate whether the trigger is this ELF, its
-   private libdrm, the kernel DRM ioctl, or a consumer's repeated polling.
-   Do not enable automatic K4 polling or console integration before a stable
-   result is demonstrated.
-4. Once validated, publish two runtime archives and a release manifest with
-   per-flavor hashes. Update the three consumers to pin that release in one
-   coordinated change; rebuild and validate each resulting SPK before release.
-
-Do not overwrite existing v0.1.1 assets while their build provenance is being
-audited. New binaries require a new, explicitly chosen package version.
+For future runtime changes, publish a new version with a build record, source
+revision, archive hash, per-file manifest, and real-device validation. Update
+each consumer's pinned URL and hash, rebuild its SPK, and verify packaged
+bytes against the central manifest before release.

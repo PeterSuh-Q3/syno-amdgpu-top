@@ -31,7 +31,7 @@ amdgpu_top
 `/usr/bin/amdgpu_top` 심볼릭 링크가 자동으로 등록됩니다. 패키지는 `/dev/dri/renderD*` 노드를 모두 검색하므로, AMD 노드 번호가 `renderD128`이 아니어도 찾습니다. AMD DRM render node가 없는 NAS(Intel iGPU만 있는 경우 등)에서는 설치는 되지만 PATH 등록 없이 no-op으로 끝납니다.
 
 > [!WARNING]
-> 현재 패키지는 AMD render node가 확인되면 커널 버전과 관계없이 `/usr/bin/amdgpu_top` 심볼릭 링크를 등록합니다. K4 백포트 드라이버에서의 실행 안정성은 K5와 별개로 검증이 필요하므로, K4 환경에서는 사용 시 주의하세요.
+> v0.1.2는 DSM 7.4.1의 커널 5.10.55 및 4.4.302 환경에서 설치·링크 생성·실행을 검증했습니다. 커널 버전만으로 모든 AMD DRM 백포트와 GPU의 호환성이 보장되는 것은 아닙니다.
 
 ## 빌드
 

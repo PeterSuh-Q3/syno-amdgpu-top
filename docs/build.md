@@ -47,7 +47,7 @@ sources/amdgpu_top
 BUILDER_IMAGE=my-amdgpu-builder:generic-x86_64 ./scripts/run-spk-build.sh
 ```
 
-패키지 버전 0.1.2의 산출물은 `dist/syno-amdgpu-top-0.1.2-x86_64.spk`입니다. 파일명에는 DSM/커널 버전이 포함되지 않으며, `INFO`의 플랫폼 목록과 DSM 최소 버전은 별도로 관리됩니다. 선언된 최소 DSM은 7.2입니다. DSM 7.2 이하 및 K4 환경의 실기 검증은 별도 확인 대상입니다.
+패키지 버전 0.1.2의 산출물은 `dist/syno-amdgpu-top-0.1.2-x86_64.spk`입니다. 파일명에는 DSM/커널 버전이 포함되지 않으며, `INFO`의 플랫폼 목록과 DSM 최소 버전은 별도로 관리됩니다. 선언된 최소 DSM은 7.2입니다. DSM 7.4.1의 K4(4.4.302)와 K5(5.10.55)는 실기 검증을 마쳤으며, DSM 7.2/7.3 전체에 대한 검증을 의미하지는 않습니다.
 
 Manager 내장용 runtime bundle도 함께 만들 필요가 있을 때만 다음처럼 요청합니다.
 
@@ -55,4 +55,4 @@ Manager 내장용 runtime bundle도 함께 만들 필요가 있을 때만 다음
 BUILD_RUNTIME_BUNDLE=1 ./scripts/run-spk-build.sh
 ```
 
-단일 SPK가 `/dev/dri/renderD*` 노드를 모두 검색하고, AMD render node(PCI vendor `0x1002`)가 있으면 `/usr/bin/amdgpu_top` 심볼릭 링크를 생성합니다. K4/K5 실행 안정성은 동일하다고 가정하지 않으며, K4에서의 구체적인 동작 검증은 별도 과제입니다.
+단일 SPK가 `/dev/dri/renderD*` 노드를 모두 검색하고, AMD render node(PCI vendor `0x1002`)가 있으면 `/usr/bin/amdgpu_top` 심볼릭 링크를 생성합니다. 검증된 K4/K5 환경 이외의 DRM 백포트와 GPU에서는 별도 호환성 확인이 필요합니다.
