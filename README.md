@@ -13,7 +13,7 @@ Synology DSM용 독립형 `amdgpu_top` GPU 모니터 SPK.
 
 이미지 구성과 수동 생성 방법은 [빌드 문서](docs/build.md)를 참조하세요. 빌더는 libdrm과 Rust 기반 `amdgpu_top`의 빌드 도구만 포함하며 Mesa/LLVM/VA-API는 포함하지 않습니다.
 
-빌드가 완료되면 `dist/syno-amdgpu-top-0.1.3-x86_64.spk`가 생성됩니다. SPK 이름에는 DSM 버전이나 커널 버전을 넣지 않습니다. 파생 패키지용 runtime bundle이 필요할 때는 `BUILD_RUNTIME_BUNDLE=1 ./scripts/run-spk-build.sh`로 함께 생성할 수 있습니다.
+빌드가 완료되면 `dist/syno-amdgpu-top-0.1.4-x86_64.spk`가 생성됩니다. SPK 이름에는 DSM 버전이나 커널 버전을 넣지 않습니다. 파생 패키지용 runtime bundle이 필요할 때는 `BUILD_RUNTIME_BUNDLE=1 ./scripts/run-spk-build.sh`로 함께 생성할 수 있습니다. v0.1.4는 AMD 전용 빨간 그래프 아이콘을 포함하며, 실행 파일과 런타임은 v0.1.3과 같습니다.
 
 패키지 메타데이터의 최소 DSM은 7.2로 설정했습니다. 실제 설치 검증은 DSM 7.4.1에서 진행 중이며, DSM 7.2 및 커널 4.x 환경은 별도 실기 검증이 필요합니다.
 

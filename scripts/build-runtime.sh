@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT=${ROOT:-/work}
-BUILD_ID=${BUILD_ID:-generic-x86_64-0.1.3}
+BUILD_ID=${BUILD_ID:-generic-x86_64-0.1.4}
 PREFIX=/var/packages/syno-amdgpu-top/target
 BUILD_ROOT=$ROOT/work/${BUILD_ID}
 SOURCE_ROOT=$ROOT/sources

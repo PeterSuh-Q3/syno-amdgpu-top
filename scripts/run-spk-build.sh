@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-BUILD_ID=generic-x86_64-0.1.3
+BUILD_ID=generic-x86_64-0.1.4
 BUILDER_IMAGE=${BUILDER_IMAGE:-syno-amdgpu-top-builder:generic-x86_64}
 
 if ! docker image inspect "$BUILDER_IMAGE" >/dev/null 2>&1; then

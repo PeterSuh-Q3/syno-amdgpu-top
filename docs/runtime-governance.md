@@ -1,12 +1,12 @@
 # amdgpu_top runtime governance
 
-## Current source of truth (v0.1.3)
+## Current runtime source of truth (v0.1.3)
 
-[`syno-amdgpu-top` v0.1.3](https://github.com/PeterSuh-Q3/syno-amdgpu-top/releases/tag/v0.1.3)
+[`syno-amdgpu-top` v0.1.4](https://github.com/PeterSuh-Q3/syno-amdgpu-top/releases/tag/v0.1.4)
 publishes one native x86_64 `amdgpu_top` runtime bundle and a per-file SHA-256
 manifest. The executable and its private libdrm libraries are built once;
 there are no separate K4/K5 binaries or Synology kvmx64 cross-compiler inputs.
-The standalone SPK is `syno-amdgpu-top-0.1.3-x86_64.spk` and declares DSM 7.2
+The standalone SPK is `syno-amdgpu-top-0.1.4-x86_64.spk` and declares DSM 7.2
 as its minimum version.
 
 The previous v0.1.2 release reports installation, AMD render-node detection, PATH
