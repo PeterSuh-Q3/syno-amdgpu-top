@@ -1,3 +1,7 @@
+> **DSM Package Center source:** Add [https://nas.dante90.mmv.kr/](https://nas.dante90.mmv.kr/) in **Package Center → Settings → Package Sources** to browse compatible PeterSuh-Q3 packages.
+
+[![English DSM Package Center Community catalog showing PeterSuh-Q3 packages](docs/package-center-community-en.png)](https://nas.dante90.mmv.kr/)
+
 # syno-amdgpu-top
 
 Synology DSM용 독립형 `amdgpu_top` GPU 모니터 SPK.
